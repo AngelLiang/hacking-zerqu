@@ -16,12 +16,14 @@ class APIException(HTTPException):
         super(APIException, self).__init__(description, response)
 
     def get_body(self, environ=None):
+        """覆写"""
         return text_type(json.dumps(dict(
             error=self.error,
             error_description=self.description,
         )))
 
     def get_headers(self, environ=None):
+        """覆写"""
         return [('Content-Type', 'application/json')]
 
 
@@ -70,17 +72,20 @@ class Denied(APIException):
 
 
 class Conflict(APIException):
+    """冲突"""
     code = 409
     error = 'conflict'
 
 
 class InvalidAccount(APIException):
+    """无效帐号"""
     code = 403
     error = 'invalid_account'
     description = 'Your account is invalid'
 
 
 class InvalidClient(APIException):
+    """无效的客户端"""
     error = 'invalid_client'
     description = 'Client not found'
 

@@ -14,6 +14,7 @@ bp = Blueprint('api', __name__)
 
 @bp.after_request
 def headers_hook(response):
+    """蓝本的请求之后的钩子函数，处理请求头部"""
     remaining = getattr(request, '_rate_remaining', None)
     if remaining:
         response.headers['X-Rate-Limit'] = str(remaining)

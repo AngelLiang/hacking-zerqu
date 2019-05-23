@@ -155,9 +155,11 @@ class UserSession(object):
 
     def is_valid(self):
         """Verify current session is valid."""
+        """验证当前session是否合法"""
         if not current_app.config.get('ZERQU_VERIFY_SESSION'):
             return True
         ua = request.user_agent
+        # 同时判断 操作系统 和 浏览器
         return (ua.platform, ua.browser) == (self.platform, self.browser)
 
     @classmethod
@@ -166,6 +168,7 @@ class UserSession(object):
         ua = request.user_agent
         sess = cls()
 
+        # 设置缓存
         now = int(time.time())
         redis.hmset(sess._key, {
             'user_id': user.id,
@@ -174,8 +177,9 @@ class UserSession(object):
             'created_at': now,
             'last_used': now,
         })
+        # 使用了 flask.session
         session['id'] = sess.sid
-        session['ts'] = now
+        session['ts'] = now  # timestamp
         return sess
 
     @classmethod
@@ -184,6 +188,7 @@ class UserSession(object):
         if not sid:
             return False
         key = cls.KEY_PREFIX.format(sid)
+        # 清除缓存
         redis.delete(key)
         return True
 

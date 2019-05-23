@@ -20,12 +20,13 @@ __all__ = ['User', 'UserSession']
 class User(Base):
     __tablename__ = 'zq_user'
 
-    ROLE_SUPER = 9
-    ROLE_ADMIN = 8
-    ROLE_STAFF = 7
-    ROLE_VERIFIED = 4
-    ROLE_SPAMMER = -9
-    ROLE_ACTIVE = 1
+    # 角色标识
+    ROLE_SUPER = 9      # 超级管理员
+    ROLE_ADMIN = 8      # 管理员
+    ROLE_STAFF = 7      # 员工
+    ROLE_VERIFIED = 4   # 已核实用户
+    ROLE_SPAMMER = -9   # 垃圾邮件制作者
+    ROLE_ACTIVE = 1     # 已激活用户
 
     id = Column(Integer, primary_key=True)
     username = Column(String(24), unique=True)
@@ -61,6 +62,7 @@ class User(Base):
 
     @cached_property
     def label(self):
+        """角色标注"""
         if self.role >= self.ROLE_STAFF:
             return 'staff'
         if self.role == self.ROLE_VERIFIED:

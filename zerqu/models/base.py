@@ -16,6 +16,7 @@ from zerqu.libs.errors import NotFound
 
 __all__ = ['db', 'CACHE_TIMES', 'Base', 'JSON', 'ARRAY']
 
+# 缓存超时时间映射
 CACHE_TIMES = {
     'get': ONE_DAY,
     'count': ONE_DAY,
@@ -28,6 +29,9 @@ CACHE_MODEL_PREFIX = 'db'
 class SQLAlchemy(_SQLAlchemy):
     @contextmanager
     def auto_commit(self, throw=True):
+        """自动提交
+        :param throw: bool, 是否抛出异常
+        """
         try:
             yield
             self.session.commit()
@@ -46,20 +50,33 @@ db = SQLAlchemy(session_options={
 
 class CacheQuery(Query):
     def get(self, ident):
+        """覆写 ``Query.get()`` 方法"""
+
+        # 获取模型的mapper
+        # 相当于 sqlalchemy.inspect(Model) 和 sqlalchemy.orm.class_mapper(Model)
+        # 只不过 _only_full_mapper_zero('get') 是 Query 的私有方法
         mapper = self._only_full_mapper_zero('get')
 
+        # 生成后缀
         if isinstance(ident, (list, tuple)):
+            # 多个主键，例如：get((5, 10))
+            # https://docs.sqlalchemy.org/en/13/orm/query.html#sqlalchemy.orm.query.Query.get
             suffix = '-'.join(map(str, ident))
         else:
             suffix = str(ident)
 
+        # 生成cache key
+        # mapper.class_ 即获取该 mapper 的模型
+        # generate_cache_prefix 方法是在 BaseMixin 类里
         key = mapper.class_.generate_cache_prefix('get') + suffix
+        # 从缓存中获取数据
         rv = cache.get(key)
         if rv:
             return rv
         rv = super(CacheQuery, self).get(ident)
         if rv is None:
             return None
+        # 设置缓存
         cache.set(key, rv, CACHE_TIMES['get'])
         return rv
 
@@ -71,18 +88,23 @@ class CacheQuery(Query):
         if len(mapper.primary_key) != 1:
             raise NotImplemented
 
+        # 生成前缀
         prefix = mapper.class_.generate_cache_prefix('get')
+        # 生成keys
         keys = {prefix + str(i) for i in idents}
+        # 获取缓存数据
         rv = cache.get_dict(*keys)
-
+        # 缓存数据是否命中
         missed = {i for i in idents if rv[prefix + str(i)] is None}
 
         rv = {k.lstrip(prefix): rv[k] for k in rv}
-
+        # 全都命中
         if not missed:
             return rv
 
+        # 获取主键
         pk = mapper.primary_key[0]
+        # 主键in_查询
         missing = self.filter(pk.in_(missed)).all()
         to_cache = {}
         for item in missing:
@@ -180,25 +202,35 @@ class BaseMixin(object):
 
     @classmethod
     def generate_cache_prefix(cls, name):
+        # prefix example:
+        # - `db:get:zq_user`
+        # - `db:count:zq_user`
         prefix = '%s:%s:%s' % (CACHE_MODEL_PREFIX, name, cls.__tablename__)
         if hasattr(cls, '__cache_version__'):
+            # example: `db:get:zq_user|<__cache_version__>:`
             return '%s|%s:' % (prefix, cls.__cache_version__)
+        # example: `db:get:zq_user:`
         return '%s:' % prefix
 
     @classmethod
     def __declare_last__(cls):
         @event.listens_for(cls, 'after_insert')
         def receive_after_insert(mapper, conn, target):
+            """sqlalchemy事件监听，监听insert之后"""
+            # 更新统计
             cache.inc(target.generate_cache_prefix('count'))
 
         @event.listens_for(cls, 'after_update')
         def receive_after_update(mapper, conn, target):
+            """sqlalchemy事件监听，监听update之后"""
             key = _unique_key(target, mapper.primary_key)
             cache.set(key, target, CACHE_TIMES['get'])
 
         @event.listens_for(cls, 'after_delete')
         def receive_after_delete(mapper, conn, target):
+            """sqlalchemy事件监听，监听delete之后"""
             key = _unique_key(target, mapper.primary_key)
+            # 更新统计
             cache.delete_many(key, target.generate_cache_prefix('count'))
 
 

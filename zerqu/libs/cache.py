@@ -46,6 +46,7 @@ def execute_pipeline(prefix='zerqu'):
         pipe.execute()
 
 
+# 线程本地局部变量
 cache = LocalProxy(use_cache)
 redis = LocalProxy(use_redis)
 

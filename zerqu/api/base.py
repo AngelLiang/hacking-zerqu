@@ -14,9 +14,26 @@ from zerqu.models import UserSession, OAuthClient
 
 
 class ApiBlueprint(object):
+    """自定义API蓝本类
+
+    Usage::
+
+        users_api = ApiBlueprint('users')
+
+        def init_app(app):
+            users_api.register(bp)
+            app.register_blueprint(bp, url_prefix='/api/1')
+
+    """
+
     def __init__(self, name):
         self.name = name
+
         self.deferred = []
+        """延迟注册路由队列
+        调用 ApiBlueprint().route() 时候只是把相关函数挂在在这里，
+        等调用 ApiBlueprint().register() 方法的时候才是真正注册到 flask.Blueprint
+        """
 
     def route(self, rule, **options):
         def wrapper(f):
@@ -25,15 +42,27 @@ class ApiBlueprint(object):
         return wrapper
 
     def register(self, bp, url_prefix=None):
+        """
+        :param bp: flask.Blueprint
+        :param url_prefix:
+        """
         if url_prefix is None:
             url_prefix = '/' + self.name
 
         for f, rule, options in self.deferred:
             endpoint = options.pop("endpoint", f.__name__)
+            # 注册到真正的 flask.Blueprint 上
             bp.add_url_rule(url_prefix + rule, endpoint, f, **options)
 
 
 def oauth_limit_params(login, scopes):
+    """获取oauth限制的参数
+
+    :param login: bool， 是否需要登录
+    :param scopes: list， 作用域
+
+    返回 (prefix, count, duration) 元组
+    """
     if scopes is None:
         scopes = []
 
@@ -42,8 +71,10 @@ def oauth_limit_params(login, scopes):
         request._current_user = user
         return 'limit:sid:{0}'.format(session.get('id')), 600, 300
 
+    # 验证登录和作用域
     valid, req = oauth.verify_request(scopes)
     if login and (not valid or not req.user):
+        # 未验证
         raise NotAuth()
 
     if valid:
@@ -52,6 +83,7 @@ def oauth_limit_params(login, scopes):
         key = 'limit:tok:%s' % req.access_token.access_token
         return key, 600, 600
 
+    # client_id
     client_id = request.values.get('client_id')
     if client_id:
         c = OAuthClient.query.filter_by(
@@ -63,28 +95,42 @@ def oauth_limit_params(login, scopes):
 
         request.oauth_client = c
         return 'limit:client:{0}'.format(c.id), 600, 600
+    # 如果什么都没有，则使用IP作为标识符
     return 'limit:ip:{0}'.format(request.remote_addr), 3600, 3600
 
 
 def oauth_ratelimit(login, scopes):
     prefix, count, duration = oauth_limit_params(login, scopes)
-    rv = ratelimit(prefix, count, duration)
+    rv = ratelimit(prefix, count, duration)  # 速率限制
+    # 挂到线程局部变量 request 下
     request._rate_remaining, request._rate_expires = rv
 
 
 def cache_response(cache_time):
+    """响应缓存装饰器
+
+    :param cache_time: 需要缓存时间
+
+    Usage::
+
+        cache_response(cache_time)(f)(*args, **kwargs)
+
+    """
     def wrapper(f):
         @wraps(f)
         def decorated(*args, **kwargs):
+            # 如果是已登录用户或请求方法非GET方法，则不缓存
             if current_user or request.method != 'GET':
                 return f(*args, **kwargs)
 
             key = 'api:%s' % request.full_path
-            response = cache.get(key)
+            response = cache.get(key)  # 从缓存中获取
             if response:
+                # 缓存命中
                 return response
+            # 缓存没命中则进入这里
             response = f(*args, **kwargs)
-            cache.set(key, response, cache_time)
+            cache.set(key, response, cache_time)  # 设置缓存
             return response
         return decorated
     return wrapper

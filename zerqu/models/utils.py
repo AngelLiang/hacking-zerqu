@@ -7,6 +7,7 @@ from .user import User, UserSession
 
 
 class Anonymous(Empty):
+    """匿名用户类"""
     id = None
 
     def __str__(self):
@@ -15,10 +16,13 @@ class Anonymous(Empty):
     def __repr__(self):
         return "<User: Anonymous>"
 
+
+# 匿名用户
 ANONYMOUS = Anonymous()
 
 
 def _get_current_user():
+    """获取当前用户"""
     user = getattr(request, '_current_user', None)
     if user:
         return user
@@ -47,4 +51,5 @@ def iter_items_with_users(items, users=None):
         yield data
 
 
+# 创建一个 current_user 线程本地变量
 current_user = LocalProxy(_get_current_user)

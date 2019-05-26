@@ -32,6 +32,7 @@ class Form(BaseForm):
 
 
 class UserForm(Form):
+    """用户表单"""
     username = StringField(validators=[
         DataRequired(),
         Length(min=3, max=20),
@@ -41,10 +42,12 @@ class UserForm(Form):
 
 
 class PasswordForm(Form):
+    """密码表单"""
     password = PasswordField(validators=[DataRequired()])
 
 
 class FindPasswordForm(Form):
+    """查找密码表单"""
     username = StringField('Username or Email', validators=[DataRequired()])
 
     def validate_username(self, field):
@@ -61,6 +64,7 @@ class FindPasswordForm(Form):
 
 
 class LoginForm(PasswordForm):
+    """登录表单，继承PasswordForm"""
     username = StringField('Username or Email', validators=[DataRequired()])
 
     def validate_password(self, field):
@@ -77,6 +81,7 @@ class LoginForm(PasswordForm):
 
 
 class EmailForm(Form):
+    """邮箱表单"""
     email = StringField(validators=[DataRequired(), Email()])
 
     def validate_email(self, field):
@@ -85,11 +90,13 @@ class EmailForm(Form):
 
 
 class UserProfileForm(Form):
+    """用户信息表单"""
     name = StringField(validators=[Length(min=0, max=24)])
     description = StringField(validators=[Length(min=0, max=280)])
 
 
 class RegisterForm(UserForm, EmailForm):
+    """注册表单，继承UserForm和EmailForm"""
     def validate_username(self, field):
         if User.cache.filter_first(username=field.data):
             raise StopValidation('Username has been registered.')
@@ -217,6 +224,7 @@ class TopicForm(Form):
 
 
 class CommentForm(Form):
+    """评论表单"""
     reply_to = IntegerField()
     content = TextAreaField()
 

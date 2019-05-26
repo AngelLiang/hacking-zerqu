@@ -9,6 +9,7 @@ VERSION_URL = re.compile(r'^/api/\d/')
 VERSION_ACCEPT = re.compile(r'application/vnd\.zerqu\+json;\s+version=(\d)')
 CURRENT_VERSION = '1'
 
+# 这才是真正的 flask.Blueprint
 bp = Blueprint('api', __name__)
 
 
@@ -46,6 +47,7 @@ def find_version(environ):
 
 
 class ApiVersionMiddleware(object):
+    """API版本中间件"""
     def __init__(self, app):
         self.app = app
 
@@ -64,9 +66,11 @@ class ApiVersionMiddleware(object):
 def init_app(app):
     app.wsgi_app = ApiVersionMiddleware(app.wsgi_app)
 
+    # 把自定义 Blueprint 注册到 bp 上
     front.api.register(bp)
     users.api.register(bp)
     cafes.api.register(bp)
     topics.api.register(bp)
 
+    # 给 flask app 注册 Blueprint
     app.register_blueprint(bp, url_prefix='/api/1')

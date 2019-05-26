@@ -10,6 +10,7 @@ logger = logging.getLogger('zerqu')
 
 
 class Ratelimiter(object):
+    """速率限制器"""
     def __init__(self, db):
         self.db = db
 
@@ -57,8 +58,14 @@ limiter = Ratelimiter(cache)
 
 
 def ratelimit(prefix, count=600, duration=300):
+    """速率限制
+
+    :param remaining:
+    :param expires: 过期时间，单位秒？
+    """
     remaining, expires = limiter(prefix, count, duration)
     if remaining <= 0 and expires:
+        # 超过速率限制，expires秒后重试。
         description = 'Rate limit exceeded, retry in %is' % expires
         raise LimitExceeded(description=description)
     return remaining, expires

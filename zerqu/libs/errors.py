@@ -91,5 +91,6 @@ class InvalidClient(APIException):
 
 
 class LimitExceeded(APIException):
+    """超过速率限制异常"""
     code = 429
     error = 'limit_exceeded'

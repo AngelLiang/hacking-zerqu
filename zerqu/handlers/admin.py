@@ -10,6 +10,7 @@ from zerqu.models import User, Cafe, Topic
 
 
 class LoginMixin(object):
+    """for flask_admin"""
     def is_accessible(self):
         if not current_user:
             return False

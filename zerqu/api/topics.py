@@ -24,6 +24,7 @@ api = ApiBlueprint('topics')
 @api.route('/timeline')
 @require_oauth(login=False, cache_time=600)
 def timeline():
+    """时间线"""
     cursor = int_or_raise('cursor', 0)
     if request.args.get('show') == 'all':
         topics, cursor = get_all_topics(cursor)
@@ -42,6 +43,7 @@ def timeline():
 @api.route('', methods=['POST'])
 @require_oauth(login=True, scopes=['topic:write'])
 def create_topic():
+    """创建主题"""
     form = TopicForm.create_api_form()
     topic = form.create_topic(current_user.id)
     data = make_topic_response(topic)
@@ -51,6 +53,7 @@ def create_topic():
 @api.route('/<int:tid>')
 @require_oauth(login=False)
 def view_topic(tid):
+    """查看主题"""
     topic = Topic.cache.get_or_404(tid)
     data = make_topic_response(topic)
 
@@ -70,6 +73,7 @@ def view_topic(tid):
 @api.route('/<int:tid>', methods=['POST'])
 @require_oauth(login=True, scopes=['topic:write'])
 def update_topic(tid):
+    """更新主题"""
     topic = Topic.query.get(tid)
     if not topic:
         raise NotFound('Topic')
@@ -116,6 +120,7 @@ def flag_topic(tid):
 @api.route('/<int:tid>/comments')
 @require_oauth(login=False, cache_time=600)
 def view_topic_comments(tid):
+    """查看主题评论"""
     topic = Topic.cache.get_or_404(tid)
     comments, cursor = cursor_query(
         Comment, lambda q: q.filter_by(topic_id=topic.id)
@@ -140,6 +145,7 @@ def view_topic_comments(tid):
 @api.route('/<int:tid>/comments', methods=['POST'])
 @require_oauth(login=True, scopes=['comment:write'])
 def create_topic_comment(tid):
+    """创建主题评论"""
     topic = Topic.cache.get_or_404(tid)
     form = CommentForm.create_api_form()
     comment = form.create_comment(current_user.id, topic.id)
@@ -200,6 +206,7 @@ def unlike_topic(tid):
 @api.route('/<int:tid>/comments/<int:cid>', methods=['DELETE'])
 @require_oauth(login=True, scopes=['comment:write'])
 def delete_topic_comment(tid, cid):
+    """删除主题评论"""
     comment = get_comment_or_404(tid, cid)
     if comment.user_id != current_user.id:
         raise Denied('deleting this comment')

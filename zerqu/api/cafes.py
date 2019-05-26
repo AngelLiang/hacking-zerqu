@@ -22,6 +22,7 @@ api = ApiBlueprint('cafes')
 @api.route('')
 @require_oauth(login=False, cache_time=300)
 def list_cafes():
+    """GET /cafes"""
     data, cursor = cursor_query(Cafe)
     data = list(iter_items_with_users(data))
 
@@ -37,6 +38,7 @@ def list_cafes():
 @api.route('', methods=['POST'])
 @require_oauth(login=True, scopes=['cafe:write'])
 def create_cafe():
+    """POST /cafes"""
     role = current_app.config.get('ZERQU_CAFE_CREATOR_ROLES')
     if current_user.role not in role:
         raise Denied('creating cafe')
@@ -48,6 +50,7 @@ def create_cafe():
 @api.route('/<slug>')
 @require_oauth(login=False, cache_time=300)
 def view_cafe(slug):
+    """GET /<slug>"""
     cafe = Cafe.cache.first_or_404(slug=slug)
     data = dict(cafe)
     data['user'] = User.cache.get(cafe.user_id)

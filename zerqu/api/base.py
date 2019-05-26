@@ -72,6 +72,7 @@ def oauth_limit_params(login, scopes):
         return 'limit:sid:{0}'.format(session.get('id')), 600, 300
 
     # 验证登录和作用域
+    # 自此 login 和 scopes 参数完成任务
     valid, req = oauth.verify_request(scopes)
     if login and (not valid or not req.user):
         # 未验证
@@ -137,6 +138,11 @@ def cache_response(cache_time):
 
 
 def require_oauth(login=True, scopes=None, cache_time=None):
+    """
+    :param login: bool, 是否需要登录
+    :param scopes: list, 作用域
+    :param cache_time: 缓存时间
+    """
     def wrapper(f):
         @wraps(f)
         def decorated(*args, **kwargs):

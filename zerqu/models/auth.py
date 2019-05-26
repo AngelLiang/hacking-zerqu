@@ -32,7 +32,7 @@ class OAuthClient(Base):
     client_secret = Column(String(64), unique=True, index=True)
 
     is_confidential = Column(Boolean, default=False)
-    default_scope = Column(String(140), default='')
+    default_scope = Column(String(140), default='')  # 默认作用域
     _redirect_uris = Column('redirect_uris', Text)
 
     created_at = Column(DateTime, default=datetime.datetime.utcnow)
@@ -93,7 +93,7 @@ class OAuthToken(Base):
     access_token = Column(String(34), unique=True, index=True)
     refresh_token = Column(String(34), unique=True, index=True)
     token_type = Column(String(10), default='Bearer')
-    scope = Column(String(480), default='')
+    scope = Column(String(480), default='')  # 作用域
     expires_in = Column(Integer, default=3600)
 
     created_at = Column(DateTime, default=datetime.datetime.utcnow)

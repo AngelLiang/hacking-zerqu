@@ -24,7 +24,10 @@ api = ApiBlueprint('topics')
 @api.route('/timeline')
 @require_oauth(login=False, cache_time=600)
 def timeline():
-    """时间线"""
+    """时间线
+    GET /topics
+    GET /topics/timeline
+    """
     cursor = int_or_raise('cursor', 0)
     if request.args.get('show') == 'all':
         topics, cursor = get_all_topics(cursor)
@@ -43,7 +46,9 @@ def timeline():
 @api.route('', methods=['POST'])
 @require_oauth(login=True, scopes=['topic:write'])
 def create_topic():
-    """创建主题"""
+    """创建主题
+    POST /topics
+    """
     form = TopicForm.create_api_form()
     topic = form.create_topic(current_user.id)
     data = make_topic_response(topic)
@@ -53,7 +58,9 @@ def create_topic():
 @api.route('/<int:tid>')
 @require_oauth(login=False)
 def view_topic(tid):
-    """查看主题"""
+    """查看主题
+    GET /topics/<int:tid>
+    """
     topic = Topic.cache.get_or_404(tid)
     data = make_topic_response(topic)
 
@@ -73,7 +80,9 @@ def view_topic(tid):
 @api.route('/<int:tid>', methods=['POST'])
 @require_oauth(login=True, scopes=['topic:write'])
 def update_topic(tid):
-    """更新主题"""
+    """更新主题
+    POST /topics/<int:tid>
+    """
     topic = Topic.query.get(tid)
     if not topic:
         raise NotFound('Topic')
@@ -92,6 +101,9 @@ def update_topic(tid):
 @api.route('/<int:tid>/read', methods=['POST'])
 @require_oauth(login=True)
 def write_read_percent(tid):
+    """
+    POST /topics/<int:tid>/read
+    """
     topic = Topic.cache.get_or_404(tid)
     percent = request.get_json().get('percent')
     if not isinstance(percent, int):
@@ -267,6 +279,8 @@ def unlike_topic_comment(tid, cid):
     with db.auto_commit(False):
         comment.reset_like_count()
     return '', 204
+
+####################################################################
 
 
 def get_comment_or_404(tid, cid):

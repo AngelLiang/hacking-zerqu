@@ -14,6 +14,7 @@ api = ApiBlueprint('')
 
 @api.route('')
 def index():
+    """GET /"""
     config = current_app.config
     return jsonify(
         system='zerqu',

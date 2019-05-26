@@ -17,6 +17,7 @@ api = ApiBlueprint('users')
 @api.route('', methods=['POST'])
 @require_confidential
 def create_user():
+    """POST /users"""
     form = RegisterForm.create_api_form()
     user = form.create_user()
     return jsonify(user), 201
@@ -25,6 +26,7 @@ def create_user():
 @api.route('')
 @require_oauth(login=False, cache_time=300)
 def list_users():
+    """GET /users"""
     q = User.query.filter(User.role >= 0).order_by(User.reputation.desc())
     data = q.limit(100).all()
     return jsonify(data=data)
@@ -33,6 +35,7 @@ def list_users():
 @api.route('/<username>')
 @require_oauth(login=False, cache_time=600)
 def view_user(username):
+    """GET /users/<username>"""
     user = User.cache.first_or_404(username=username)
     return jsonify(user)
 
@@ -40,6 +43,7 @@ def view_user(username):
 @api.route('/<username>/cafes')
 @require_oauth(login=False, cache_time=600)
 def view_user_cafes(username):
+    """GET /users/<username>/cafes"""
     user = User.cache.first_or_404(username=username)
     cafe_ids = CafeMember.get_user_following_cafe_ids(user.id)
     cafes = Cafe.cache.get_many(cafe_ids)

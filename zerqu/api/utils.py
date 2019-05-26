@@ -8,6 +8,7 @@ from zerqu.models import db
 
 
 def int_or_raise(key, value=0, maxvalue=None):
+    """从 request 获取 int 类型的参数，类型不对则抛出异常"""
     try:
         num = int(request.args.get(key, value))
         if maxvalue is not None and num > maxvalue:
@@ -51,10 +52,12 @@ def cursor_query(model, filter_func=None):
 
 
 def get_pagination_query():
+    # 获取页数参数
     page = int_or_raise('page', 1)
     if page < 1:
         raise APIException(description='page should be larger than 1')
 
+    # 获取每页数量参数
     perpage = int_or_raise('perpage', 20, 100)
     if perpage < 10:
         raise APIException(description='perpage should be larger than 10')
@@ -62,6 +65,7 @@ def get_pagination_query():
 
 
 def pagination_query(model, key, **filters):
+    """分页查询"""
     page, perpage = get_pagination_query()
 
     total = model.cache.filter_count(**filters)

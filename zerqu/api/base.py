@@ -30,7 +30,7 @@ class ApiBlueprint(object):
         self.name = name
 
         self.deferred = []
-        """延迟注册路由队列
+        """延迟注册路由队列，成员是一个三元组： (function, rule, options)
         调用 ApiBlueprint().route() 时候只是把相关函数挂在在这里，
         等调用 ApiBlueprint().register() 方法的时候才是真正注册到 flask.Blueprint
         """

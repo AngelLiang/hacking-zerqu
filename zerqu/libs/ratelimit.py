@@ -22,8 +22,8 @@ class Ratelimiter(object):
         """创建数据
 
         :param remaining: 剩余次数
-        :param expires_at: 重置次数的过期时间
-        :param duration: 缓存过期时间
+        :param expires_at: int, 重置次数的过期时间
+        :param duration: int, 缓存过期时间
         """
         self.db.set_many({
             self.count_key: remaining,
@@ -31,10 +31,10 @@ class Ratelimiter(object):
         }, duration)
 
     def remain(self, remaining, expires):
-        """缓存
+        """剩余次数缓存
 
-        :param remaining: 剩余次数
-        :param expires: 过期时间
+        :param remaining: int, 剩余次数
+        :param expires: int, 过期时间
         """
         if expires > 0:
             self.db.set(self.count_key, remaining, expires)
@@ -51,7 +51,7 @@ class Ratelimiter(object):
 
         remaining, resetting = self.get_data()
         if not remaining and not resetting:
-            # 缓存中没有数据
+            # 缓存中没有数据，可能是没有创建或已经过期
             remaining = count - 1
             expires_at = duration + int(time.time())  # 过期时间
             self.create(remaining, expires_at, duration)
@@ -59,12 +59,13 @@ class Ratelimiter(object):
         else:
             # 缓存中有数据
             if resetting is None:
-                expires = 5
+                expires = 5  # 5秒
             else:
+                # 计算剩余时间，单位秒
                 expires = int(resetting) - int(time.time())
 
             if remaining is None:
-                remaining = 5
+                remaining = 5  # 5次
 
             if remaining <= 0 and expires:
                 return remaining, expires

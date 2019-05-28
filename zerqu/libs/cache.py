@@ -12,6 +12,7 @@ FIVE_MINUTES = 300
 
 
 def init_app(app):
+    """缓存初始化"""
     from redis import StrictRedis
     from flask_oauthlib.contrib.cache import Cache
 

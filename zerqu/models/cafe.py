@@ -15,11 +15,12 @@ __all__ = ['Cafe', 'CafeMember', 'CafeTopic']
 class Cafe(Base):
     __tablename__ = 'zq_cafe'
 
+    # Cafe状态
     STATUSES = {
-        0: 'closed',
-        1: 'active',
-        6: 'verified',
-        9: 'official',
+        0: 'closed',  # 已关闭
+        1: 'active',  # 激活
+        6: 'verified',  # 已验证
+        9: 'official',  # 官方
     }
     STATUS_CLOSED = 0
     STATUS_ACTIVE = 1
@@ -27,10 +28,13 @@ class Cafe(Base):
     STATUS_OFFICIAL = 9
 
     # everyone can write
+    # 所有人都可以编辑
     PERMISSION_PUBLIC = 0
     # write should be approved by members
+    # 被认可的成员可以编辑
     PERMISSION_APPROVE = 3
     # only member can write
+    # 只有成员可以编辑
     PERMISSION_MEMBER = 6
 
     PERMISSIONS = {
@@ -87,6 +91,11 @@ class Cafe(Base):
         return label
 
     def has_write_permission(self, user_id, membership=EMPTY):
+        """是否有编辑权限
+
+        :param user_id:
+        :param membership:
+        """
         if not user_id:
             return False
 
@@ -106,6 +115,11 @@ class Cafe(Base):
         return role in (CafeMember.ROLE_MEMBER, CafeMember.ROLE_ADMIN)
 
     def has_admin_permission(self, user_id, membership=EMPTY):
+        """是否有管理权限
+
+        :param user_id:
+        :param membership:
+        """
         if not user_id:
             return False
 
@@ -208,6 +222,7 @@ class CafeMember(Base):
 class CafeTopic(Base):
     __tablename__ = 'zq_cafe_topic'
 
+    # 状态
     STATUS_DRAFT = 0
     STATUS_PUBLIC = 1
 

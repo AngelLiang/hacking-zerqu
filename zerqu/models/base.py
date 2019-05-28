@@ -256,6 +256,7 @@ def _itervalues(data, idents):
 
 
 class RedisStat(object):
+    """Redis状态类"""
     KEY_PREFIX = 'stat:{}'
 
     def __init__(self, ident):

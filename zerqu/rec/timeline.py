@@ -7,6 +7,12 @@ from zerqu.libs.cache import cached
 
 
 def get_timeline_topics(cursor=None, user_id=None, count=20):
+    """获取时间线上的主题
+
+    :param cursor:
+    :param user_id:
+    :param count: int, default is 20
+    """
     if user_id:
         cafe_ids = get_following_cafe_ids(user_id)
     else:
@@ -33,6 +39,7 @@ def get_all_topics(cursor=None, count=20):
 
 @cached('timeline:following_cafe_ids:%s')
 def get_following_cafe_ids(user_id):
+    """获取关注的cafe ids"""
     q = db.session.query(Cafe.id).filter_by(status=Cafe.STATUS_OFFICIAL)
     official = {cafe_id for cafe_id, in q}
     following = CafeMember.get_user_following_cafe_ids(user_id)

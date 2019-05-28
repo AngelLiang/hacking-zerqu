@@ -25,6 +25,7 @@ def xmldatetime(date):
 
 
 def build_url(baseurl, endpoint, **kwargs):
+    """构建URL"""
     if baseurl:
         baseurl = baseurl.rstrip('/')
         urlpath = url_for(endpoint, **kwargs)
@@ -39,6 +40,7 @@ def full_url(endpoint, **kwargs):
 
 
 def canonical_url(endpoint, **kwargs):
+    """标准URL"""
     baseurl = current_app.config.get('SITE_CANONICAL_URL')
     if not baseurl:
         baseurl = current_app.config.get('SITE_URL')
@@ -46,6 +48,7 @@ def canonical_url(endpoint, **kwargs):
 
 
 def is_robot():
+    """是否是爬虫"""
     ua = str(request.user_agent).lower()
     for key in ROBOT_KEYWORDS:
         if key in ua:
@@ -54,6 +57,7 @@ def is_robot():
 
 
 def is_mobile():
+    """是否是手机端"""
     return request.user_agent.platform in MOBILE_PLATFORMS
 
 

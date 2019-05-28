@@ -15,13 +15,16 @@ from .base import db, Base, JSON, ARRAY, CACHE_TIMES, RedisStat
 
 
 class Topic(Base):
+    """主题"""
     __tablename__ = 'zq_topic'
 
+    # 主题状态
     STATUS_DRAFT = 0
     STATUS_PUBLIC = 1
     STATUS_CLOSED = 2
     STATUS_FEATURED = 3
 
+    # 状态映射
     STATUSES = {
         STATUS_DRAFT: 'draft',
         STATUS_PUBLIC: 'public',
@@ -71,6 +74,7 @@ class Topic(Base):
 
     @property
     def editable(self):
+        """可编辑"""
         if not current_user:
             return False
         if current_user.id != self.user_id:
@@ -114,6 +118,7 @@ class Topic(Base):
 
 
 class TopicStat(RedisStat):
+    """主题状态"""
     KEY_PREFIX = 'topic_stat:{}'
     TOPIC_FLAGS = 'topic_flags'
 
@@ -141,6 +146,7 @@ class TopicStat(RedisStat):
 
 
 class TopicLike(Base):
+    """喜欢的主题"""
     __tablename__ = 'zq_topic_like'
 
     topic_id = Column(Integer, primary_key=True, autoincrement=False)
@@ -157,6 +163,7 @@ class TopicLike(Base):
 
 
 class TopicRead(Base):
+    """已读主题？"""
     __tablename__ = 'zq_topic_read'
 
     topic_id = Column(Integer, primary_key=True, autoincrement=False)
@@ -187,6 +194,7 @@ class TopicRead(Base):
 
 
 class Comment(Base):
+    """评论"""
     __tablename__ = 'zq_comment'
 
     id = Column(Integer, primary_key=True)
@@ -241,6 +249,7 @@ class Comment(Base):
 
 
 class CommentLike(Base):
+    """喜欢的评论"""
     __tablename__ = 'zq_comment_like'
 
     comment_id = Column(Integer, primary_key=True, autoincrement=False)

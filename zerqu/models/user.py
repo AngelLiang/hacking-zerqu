@@ -98,14 +98,14 @@ class User(Base):
         self._avatar_url = url
 
 
-@event.listens_for(User, 'after_update')
+@event.listens_for(User, 'after_update')  # 注册 User 更新之后事件
 def receive_user_after_update(mapper, conn, target):
     if target not in db.session.dirty:
         return
 
     to_delete = []
 
-    prefix = target.generate_cache_prefix('ff')
+    prefix = target.generate_cache_prefix('ff')  # 生成 filter_first 缓存前缀
     for key in ['username', 'email']:
         state = get_history(target, key)
         for value in state.deleted:

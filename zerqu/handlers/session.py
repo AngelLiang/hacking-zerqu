@@ -14,17 +14,20 @@ bp = Blueprint('session', __name__)
 
 @bp.route('', methods=['POST', 'DELETE'])
 def login_session():
+    # 用户登出
     if request.method == 'DELETE':
         if UserSession.logout():
             return '', 204
         return jsonify(status='error'), 400
 
+    # 取参
     if request.mimetype == 'application/json':
         username, password = parse_auth_headers()
     else:
         username = request.form.username
         password = request.form.password
 
+    # 验参
     if not username or not password:
         return jsonify(
             status='error',
@@ -34,21 +37,24 @@ def login_session():
 
     # can only try login a user 5 times
     prefix = 'limit:login:{0}:{1}'.format(username, request.remote_addr)
-    ratelimit(prefix, 5, 3600)
+    ratelimit(prefix, 5, 3600)  # 同一个用户名一小时内可以尝试登录5次
 
     prefix = 'limit:login:{0}'.format(request.remote_addr)
-    ratelimit(prefix, 60, 3600)
+    ratelimit(prefix, 60, 3600)  # 同一个IP一小时内可以尝试登录5次
 
     if '@' in username:
+        # 邮箱
         user = User.cache.filter_first(email=username)
     else:
+        # 用户名
         user = User.cache.filter_first(username=username)
 
+    # 验证密码
     if not user or not user.check_password(password):
         return handle_login_failed(username, user)
 
     data = request.get_json()
-    permanent = data.get('permanent', False)
+    permanent = data.get('permanent', False)  # 是否永久的
     UserSession.login(user, permanent)
     return jsonify(user), 201
 

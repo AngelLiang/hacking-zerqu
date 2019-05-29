@@ -11,6 +11,7 @@ logger = logging.getLogger('zerqu')
 
 class Ratelimiter(object):
     """速率限制器"""
+
     def __init__(self, db):
         self.db = db
 
@@ -31,7 +32,7 @@ class Ratelimiter(object):
         }, duration)
 
     def remain(self, remaining, expires):
-        """剩余次数缓存
+        """剩余次数缓存处理
 
         :param remaining: int, 剩余次数
         :param expires: int, 过期时间
@@ -46,6 +47,7 @@ class Ratelimiter(object):
         :param duration: int, 过期时间
         """
         logger.info('Rate limit on %s' % prefix)
+        # 生成前缀
         self.count_key = '%s$c' % prefix
         self.reset_key = '%s$r' % prefix
 

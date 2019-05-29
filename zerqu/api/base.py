@@ -69,6 +69,7 @@ def oauth_limit_params(login, scopes):
     user = UserSession.get_current_user()
     if user:
         request._current_user = user
+        # 600 300 表示十分钟内300次
         return 'limit:sid:{0}'.format(session.get('id')), 600, 300
 
     # 验证登录和作用域
@@ -95,8 +96,10 @@ def oauth_limit_params(login, scopes):
             raise InvalidClient(description=description)
 
         request.oauth_client = c
+        # 600 600 表示10分钟内600次
         return 'limit:client:{0}'.format(c.id), 600, 600
     # 如果什么都没有，则使用IP作为标识符
+    # 3600 3600 表示一小时内3600次
     return 'limit:ip:{0}'.format(request.remote_addr), 3600, 3600
 
 

@@ -37,10 +37,10 @@ def login_session():
 
     # can only try login a user 5 times
     prefix = 'limit:login:{0}:{1}'.format(username, request.remote_addr)
-    ratelimit(prefix, 5, 3600)  # 同一个用户名一小时内可以尝试登录5次
+    ratelimit(prefix, 5, 3600)  # 同一个用户名同一个IP在一小时内可以尝试登录5次
 
     prefix = 'limit:login:{0}'.format(request.remote_addr)
-    ratelimit(prefix, 60, 3600)  # 同一个IP一小时内可以尝试登录5次
+    ratelimit(prefix, 60, 3600)  # 同一个IP在一小时内可以尝试登录60次
 
     if '@' in username:
         # 邮箱
@@ -65,6 +65,8 @@ def signup_session():
     send_signup_email(form.email.data)
     return jsonify(message='We have sent you an email for sign up.')
 
+
+####################################################################
 
 def handle_login_failed(username, user):
     last_username = session.get('login.username', None)

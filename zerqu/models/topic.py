@@ -232,6 +232,7 @@ class Comment(Base):
         )
 
     def reset_like_count(self):
+        """重置like计数"""
         q = CommentLike.query.filter_by(comment_id=self.id)
         self.like_count = q.with_entities(func.count(1)).scalar()
         db.session.add(self)
@@ -249,7 +250,7 @@ class Comment(Base):
 
 
 class CommentLike(Base):
-    """喜欢的评论"""
+    """喜欢的评论，关联表"""
     __tablename__ = 'zq_comment_like'
 
     comment_id = Column(Integer, primary_key=True, autoincrement=False)
@@ -265,6 +266,8 @@ class CommentLike(Base):
         return fetch_current_user_items(
             cls, user_id, comment_ids, key='comment_id'
         )
+
+####################################################################
 
 
 def fetch_current_user_items(cls, user_id, ref_ids, key='topic_id'):

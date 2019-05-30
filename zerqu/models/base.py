@@ -6,6 +6,7 @@ from flask import current_app, abort
 from sqlalchemy import event, func
 from sqlalchemy.orm import Query, class_mapper
 from sqlalchemy.orm.exc import UnmappedClassError
+# 使用了 postgresql 的 JSON 和 ARRAY
 from sqlalchemy.dialects.postgresql import JSON, ARRAY
 from werkzeug.utils import cached_property
 from flask_sqlalchemy import SQLAlchemy as _SQLAlchemy
@@ -123,11 +124,16 @@ class CacheQuery(Query):
 
     def filter_first(self, **kwargs):
         mapper = self._only_mapper_zero()
+        # 缓存key前缀
         prefix = mapper.class_.generate_cache_prefix('ff')
+        # 缓存key
         key = prefix + '-'.join(['%s$%s' % (k, kwargs[k]) for k in kwargs])
+        # 获取缓存
         rv = cache.get(key)
+        # 缓存命中
         if rv:
             return rv
+        # 缓存没命中
         rv = self.filter_by(**kwargs).first()
         if rv is None:
             return None
@@ -184,6 +190,7 @@ class CacheQuery(Query):
 
 
 class CacheProperty(object):
+    """属性缓存"""
     def __init__(self, sa):
         self.sa = sa
 
@@ -253,6 +260,8 @@ def _itervalues(data, idents):
         item = data[str(k)]
         if item is not None:
             yield item
+
+####################################################################
 
 
 class RedisStat(object):

@@ -9,27 +9,33 @@ from .user import User
 
 
 class Notification(object):
-    CATEGORY_COMMENT = 'comment'
-    CATEGORY_MENTION = 'mention'
-    CATEGORY_REPLY = 'reply'
-    CATEGORY_LIKE_TOPIC = 'like_topic'
-    CATEGORY_LIKE_COMMENT = 'like_comment'
+    """通知"""
+
+    # 通知分类
+    CATEGORY_COMMENT = 'comment'    # 评论
+    CATEGORY_MENTION = 'mention'    # 提及
+    CATEGORY_REPLY = 'reply'        # 回复
+    CATEGORY_LIKE_TOPIC = 'like_topic'  # 喜欢主题
+    CATEGORY_LIKE_COMMENT = 'like_comment'  # 喜欢评论
 
     def __init__(self, user_id):
         self.user_id = user_id
         self.key = 'notification_list:{}'.format(user_id)
 
     def add(self, sender_id, category, topic_id, **kwargs):
+        """添加通知，只保存相关id、通知分类和创建时间"""
         kwargs['sender_id'] = sender_id
         kwargs['topic_id'] = topic_id
         kwargs['category'] = category
         kwargs['created_at'] = datetime.datetime.utcnow()
+        # 添加进 redis 队列
         redis.lpush(self.key, json.dumps(kwargs))
 
     def count(self):
         return redis.llen(self.key)
 
     def get(self, index):
+        # 从 redis 队列获取
         rv = redis.lrange(self.key, index, index)
         if rv:
             return rv[0]
@@ -47,6 +53,10 @@ class Notification(object):
 
     @staticmethod
     def process_notifications(items):
+        """静态方法，处理通知
+
+        retType: list, [{'sender': <sender>, 'topic': <topic>}, ... ]
+        """
         topic_ids = set()
         user_ids = set()
         data = []

@@ -14,6 +14,7 @@ def bind_events():
 
     @event.listens_for(Comment, 'after_insert')
     def record_add_comment(mapper, conn, target):
+        """Comment模型插入数据后调用"""
         run_task(_record_add_comment, target)
 
     @event.listens_for(TopicLike, 'after_insert')
@@ -41,6 +42,7 @@ def _record_add_comment(comment):
         stat['timestamp'] = time.time()
 
         if topic.user_id != comment.user_id:
+            # 如果主题user_id不是评论者，则发送评论通知
             Notification(topic.user_id).add(
                 comment.user_id,
                 Notification.CATEGORY_COMMENT,
@@ -54,6 +56,7 @@ def _record_add_comment(comment):
             if user.id in (comment.user_id, topic.user_id):
                 continue
 
+            # 发送“提及”通知
             Notification(user.id).add(
                 comment.user_id,
                 Notification.CATEGORY_MENTION,

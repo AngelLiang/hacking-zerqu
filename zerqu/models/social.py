@@ -22,6 +22,7 @@ social = OAuth()
 
 
 class SocialUser(Base):
+    """社交帐号"""
     __tablename__ = 'zq_social_user'
 
     GOOGLE = 1

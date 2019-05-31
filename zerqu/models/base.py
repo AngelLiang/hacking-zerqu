@@ -191,6 +191,7 @@ class CacheQuery(Query):
 
 class CacheProperty(object):
     """属性缓存"""
+
     def __init__(self, sa):
         self.sa = sa
 
@@ -221,21 +222,32 @@ class BaseMixin(object):
 
     @classmethod
     def __declare_last__(cls):
+        """给Mapper注册事件"""
         @event.listens_for(cls, 'after_insert')
         def receive_after_insert(mapper, conn, target):
-            """sqlalchemy事件监听，监听insert之后"""
+            """注册Mapper事件，监听insert之后
+
+            :param target: 模型
+            """
             # 更新统计
             cache.inc(target.generate_cache_prefix('count'))
 
         @event.listens_for(cls, 'after_update')
         def receive_after_update(mapper, conn, target):
-            """sqlalchemy事件监听，监听update之后"""
+            """注册Mapper事件，监听update之后
+
+            :param target: 模型
+            """
             key = _unique_key(target, mapper.primary_key)
+            # 设置缓存
             cache.set(key, target, CACHE_TIMES['get'])
 
         @event.listens_for(cls, 'after_delete')
         def receive_after_delete(mapper, conn, target):
-            """sqlalchemy事件监听，监听delete之后"""
+            """注册Mapper事件，监听delete之后
+
+            :param target: 模型
+            """
             key = _unique_key(target, mapper.primary_key)
             # 更新统计
             cache.delete_many(key, target.generate_cache_prefix('count'))

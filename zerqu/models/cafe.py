@@ -15,7 +15,7 @@ __all__ = ['Cafe', 'CafeMember', 'CafeTopic']
 class Cafe(Base):
     __tablename__ = 'zq_cafe'
 
-    # Cafe状态
+    # ### Cafe状态 ###
     STATUSES = {
         0: 'closed',  # 已关闭
         1: 'active',  # 激活
@@ -27,6 +27,7 @@ class Cafe(Base):
     STATUS_VERIFIED = 6
     STATUS_OFFICIAL = 9
 
+    # ### 权限 ###
     # everyone can write
     # 所有人都可以编辑
     PERMISSION_PUBLIC = 0
@@ -100,17 +101,21 @@ class Cafe(Base):
             return False
 
         if self.permission == self.PERMISSION_PUBLIC:
+            # 公共编辑则返回True
             return True
 
         if self.user_id == user_id:
+            # 属于该用户则返回 True
             return True
 
         if membership is EMPTY:
             membership = CafeMember.cache.get((self.id, user_id))
 
         if not membership:
+            # 没有关系成员返回 False
             return False
 
+        # 检查关系成员角色
         role = membership.role
         return role in (CafeMember.ROLE_MEMBER, CafeMember.ROLE_ADMIN)
 
@@ -140,7 +145,7 @@ class Cafe(Base):
         status = CafeTopic.STATUS_PUBLIC
         if self.permission == self.PERMISSION_APPROVE:
             has_permission = True
-            status = CafeTopic.STATUS_DRAFT
+            status = CafeTopic.STATUS_DRAFT  # 覆盖 status 变量
 
         if not has_permission:
             # TODO: raise error
@@ -152,8 +157,10 @@ class Cafe(Base):
 
 
 class CafeMember(Base):
+    """Cafe成员关联表"""
     __tablename__ = 'zq_cafe_member'
 
+    # ### 成员角色 ###
     # not joined, but has topics or comments in this cafe
     ROLE_VISITOR = 0
     # subscribed a cafe
@@ -220,9 +227,10 @@ class CafeMember(Base):
 
 
 class CafeTopic(Base):
+    """Cafe主题关联表"""
     __tablename__ = 'zq_cafe_topic'
 
-    # 状态
+    # ### 主题状态 ###
     STATUS_DRAFT = 0
     STATUS_PUBLIC = 1
 
@@ -242,6 +250,7 @@ class CafeTopic(Base):
             self.status = status
 
     def approve(self):
+        """批准"""
         self.status = self.STATUS_PUBLIC
         self.updated_at = datetime.datetime.utcnow()
         db.session.add(self)

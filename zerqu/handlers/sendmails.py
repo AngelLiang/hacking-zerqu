@@ -57,6 +57,7 @@ def send_change_password_email(email):
 
 
 def send_delete_topic_email(email, topic):
+    """发送删除主题邮件"""
     token = gen_salt(16)
     key = 'account:delete-topic:%s' % token
     redis.set(key, topic.id, ONE_DAY)

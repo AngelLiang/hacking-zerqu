@@ -18,13 +18,13 @@ class Topic(Base):
     """主题"""
     __tablename__ = 'zq_topic'
 
-    # 主题状态
+    # ### 主题状态 ###
     STATUS_DRAFT = 0
     STATUS_PUBLIC = 1
     STATUS_CLOSED = 2
     STATUS_FEATURED = 3
 
-    # 状态映射
+    # 主题状态映射
     STATUSES = {
         STATUS_DRAFT: 'draft',
         STATUS_PUBLIC: 'public',
@@ -146,7 +146,7 @@ class TopicStat(RedisStat):
 
 
 class TopicLike(Base):
-    """喜欢的主题"""
+    """喜欢的主题关联表"""
     __tablename__ = 'zq_topic_like'
 
     topic_id = Column(Integer, primary_key=True, autoincrement=False)
@@ -163,7 +163,7 @@ class TopicLike(Base):
 
 
 class TopicRead(Base):
-    """已读主题？"""
+    """已读主题关联表"""
     __tablename__ = 'zq_topic_read'
 
     topic_id = Column(Integer, primary_key=True, autoincrement=False)
@@ -250,7 +250,7 @@ class Comment(Base):
 
 
 class CommentLike(Base):
-    """喜欢的评论，关联表"""
+    """喜欢的评论关联表"""
     __tablename__ = 'zq_comment_like'
 
     comment_id = Column(Integer, primary_key=True, autoincrement=False)

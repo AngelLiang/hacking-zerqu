@@ -7,16 +7,21 @@ try:
 except ImportError:
     gevent = None
 
-
+# 爬虫浏览器
 ROBOT_BROWSERS = ('google', 'msn', 'yahoo', 'ask', 'aol')
+# 爬虫关键词
 ROBOT_KEYWORDS = ('spider', 'bot', 'crawler', '+http')
+# 手机平台
 MOBILE_PLATFORMS = ('iphone', 'android', 'wii')
 
 
 def run_task(func, *args, **kwargs):
+    """运行任务"""
+    # 如果配置了 gevent ，则使用 gevent 异步运行任务。
     if gevent and current_app.config.get('ZERQU_ASYNC'):
         gevent.spawn(copy_current_request_context(func), *args, **kwargs)
     else:
+        # 否则以同步方式直接运行
         func(*args, **kwargs)
 
 

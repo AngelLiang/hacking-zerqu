@@ -24,6 +24,10 @@ def get_timeline_topics(cursor=None, user_id=None, count=20):
 
 
 def get_all_topics(cursor=None, count=20):
+    """获取所有主题
+    :param cursor:
+    :param count: int, 主题数量
+    """
     q = db.session.query(Topic.id)
     if cursor:
         q = q.filter(Topic.id < cursor)

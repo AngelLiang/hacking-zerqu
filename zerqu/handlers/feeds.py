@@ -61,6 +61,7 @@ def cafe_feed(slug):
 
 
 def yield_feed(title, web_url, self_url, topics):
+    """生成器"""
     yield u'<?xml version="1.0" encoding="utf-8"?>\n'
     yield u'<feed xmlns="http://www.w3.org/2005/Atom">'
     yield u'<title><![CDATA[%s]]></title>' % title
@@ -77,6 +78,7 @@ def yield_feed(title, web_url, self_url, topics):
 
 
 def yield_entry(topic, user):
+    """生成器"""
     url = canonical_url('front.view_topic', tid=topic.id)
     yield u'<entry>'
     yield u'<id><![CDATA[%s]]></id>' % url

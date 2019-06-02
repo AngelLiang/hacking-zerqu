@@ -20,6 +20,7 @@ class Notification(object):
 
     def __init__(self, user_id):
         self.user_id = user_id
+        # 通知队列的缓存key
         self.key = 'notification_list:{}'.format(user_id)
 
     def add(self, sender_id, category, topic_id, **kwargs):
@@ -32,6 +33,7 @@ class Notification(object):
         redis.lpush(self.key, json.dumps(kwargs))
 
     def count(self):
+        """通知总数"""
         return redis.llen(self.key)
 
     def get(self, index):
@@ -45,6 +47,7 @@ class Notification(object):
         redis.delete(self.key)
 
     def paginate(self, page=1, perpage=20):
+        """获取通知的分页"""
         total = self.count()
         p = Pagination(total, page=page, perpage=perpage)
         start = (p.page - 1) * p.perpage

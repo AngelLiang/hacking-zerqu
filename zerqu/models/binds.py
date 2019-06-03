@@ -19,14 +19,17 @@ def bind_events():
 
     @event.listens_for(TopicLike, 'after_insert')
     def record_like_topic(mapper, conn, target):
+        """TopicLike模型插入数据事件"""
         run_task(_record_like_topic, target)
 
     @event.listens_for(TopicRead, 'after_insert')
     def record_read_topic(mapper, conn, target):
+        """TopicRead模型插入数据事件"""
         run_task(_record_read_topic, target)
 
     @event.listens_for(CommentLike, 'after_insert')
     def record_like_comment(mapper, conn, target):
+        """CommentLike模型插入数据事件"""
         run_task(_record_like_comment, target)
 
 

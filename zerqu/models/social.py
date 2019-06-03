@@ -31,10 +31,12 @@ class SocialUser(Base):
     GITHUB = 4
     WEIBO = 5
 
+    # ### 社交帐号状态 ###
     STATUS_INACTIVE = 0
     STATUS_ACTIVE = 1
     STATUS_SHARE = 2
 
+    # ### 服务映射 ###
     SERVICES = {
         'google': GOOGLE,
         'twitter': TWITTER,
@@ -159,6 +161,7 @@ def register_service(name):
 
 
 def fetch_profile(remote, data):
+    """获取个人信息"""
     if not isinstance(data, dict):
         return None
 

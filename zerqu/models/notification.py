@@ -11,7 +11,7 @@ from .user import User
 class Notification(object):
     """通知"""
 
-    # 通知分类
+    # ### 通知分类 ###
     CATEGORY_COMMENT = 'comment'    # 评论
     CATEGORY_MENTION = 'mention'    # 提及
     CATEGORY_REPLY = 'reply'        # 回复
@@ -24,7 +24,12 @@ class Notification(object):
         self.key = 'notification_list:{}'.format(user_id)
 
     def add(self, sender_id, category, topic_id, **kwargs):
-        """添加通知，只保存相关id、通知分类和创建时间"""
+        """添加通知，只保存相关id、通知分类和创建时间
+
+        :param sender_id: 发送者id
+        :param category: 通知分类
+        :param topic_id: 主题id
+        """
         kwargs['sender_id'] = sender_id
         kwargs['topic_id'] = topic_id
         kwargs['category'] = category

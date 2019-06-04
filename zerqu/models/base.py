@@ -137,13 +137,14 @@ class CacheQuery(Query):
         rv = self.filter_by(**kwargs).first()
         if rv is None:
             return None
+        # 设置缓存
         # it is hard to invalidate this cache, expires in 2 minutes
         cache.set(key, rv, CACHE_TIMES['ff'])
         return rv
 
     def filter_count(self, **kwargs):
         mapper = self._only_mapper_zero()
-        model = mapper.class_
+        model = mapper.class_  # 获取模型
         if not kwargs:
             key = model.generate_cache_prefix('count')
             rv = cache.get(key)
@@ -153,14 +154,19 @@ class CacheQuery(Query):
             rv = q.scalar()
             cache.set(key, rv, CACHE_TIMES['count'])
             return rv
-
+        # 生成前缀
         prefix = model.generate_cache_prefix('fc')
+        # 生成缓存key
         key = prefix + '-'.join(['%s$%s' % (k, kwargs[k]) for k in kwargs])
+        # 从缓存中获取数据
         rv = cache.get(key)
+        # 缓存命中
         if rv:
             return rv
+        # 缓存没命中，数据库查询
         q = self.select_from(model).with_entities(func.count(1))
         rv = q.filter_by(**kwargs).scalar()
+        # 设置缓存
         cache.set(key, rv, CACHE_TIMES['fc'])
         return rv
 
@@ -255,7 +261,7 @@ class BaseMixin(object):
 
 class Base(db.Model, BaseMixin):
     __abstract__ = True
-    cache = CacheProperty(db)
+    cache = CacheProperty(db)  # cache query
 
 
 def _unique_suffix(target, primary_key):

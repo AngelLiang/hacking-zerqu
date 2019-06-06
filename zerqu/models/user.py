@@ -86,6 +86,7 @@ class User(Base):
 
     @property
     def avatar_url(self):
+        """头像URL"""
         if not self._avatar_url:
             return None
         if self._avatar_url.startswith('http'):

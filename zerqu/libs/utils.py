@@ -83,6 +83,8 @@ def is_json():
 
 
 class Pagination(object):
+    """分页对象"""
+
     def __init__(self, total, page=1, perpage=20):
         self.total = total
         self.page = page

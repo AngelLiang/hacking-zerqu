@@ -124,9 +124,9 @@ class CacheQuery(Query):
 
     def filter_first(self, **kwargs):
         mapper = self._only_mapper_zero()
-        # 缓存key前缀
+        # 生成缓存key的前缀， 这里使用 mapper 之后就不需要 mapper 了
         prefix = mapper.class_.generate_cache_prefix('ff')
-        # 缓存key
+        # 生成缓存key，example: <prefix> + 'username$admin-rolename$admin'
         key = prefix + '-'.join(['%s$%s' % (k, kwargs[k]) for k in kwargs])
         # 获取缓存
         rv = cache.get(key)

@@ -103,7 +103,7 @@ class CacheQuery(Query):
         if not missed:
             return rv
 
-        # 获取主键
+        # 获取第一个主键
         pk = mapper.primary_key[0]
         # 主键in_查询
         missing = self.filter(pk.in_(missed)).all()
@@ -146,6 +146,7 @@ class CacheQuery(Query):
         mapper = self._only_mapper_zero()
         model = mapper.class_  # 获取模型
         if not kwargs:
+            # 没有 filter 条件
             key = model.generate_cache_prefix('count')
             rv = cache.get(key)
             if rv is not None:
@@ -154,6 +155,8 @@ class CacheQuery(Query):
             rv = q.scalar()
             cache.set(key, rv, CACHE_TIMES['count'])
             return rv
+
+        # 有 filter 条件
         # 生成前缀
         prefix = model.generate_cache_prefix('fc')
         # 生成缓存key
@@ -216,6 +219,10 @@ class BaseMixin(object):
 
     @classmethod
     def generate_cache_prefix(cls, name):
+        """生成缓存的前缀
+
+        因为需要包括数据表名称，所以只能放在这里
+        """
         # prefix example:
         # - `db:get:zq_user`
         # - `db:count:zq_user`
@@ -265,6 +272,22 @@ class Base(db.Model, BaseMixin):
 
 
 def _unique_suffix(target, primary_key):
+    """
+    getattr(target, k.name)：如果模型的属性名称和数据表名称不一致，这里会报错
+
+    可以改为::
+
+        from sqlalchemy import inspect
+
+        def _get_primary_keys(mapper):
+            return [key for key, column in inspect(mapper).columns.items() if column.primary_key]
+
+
+        def _unique_suffix(target, mapper):
+            pks = _get_primary_keys(mapper)
+            return '-'.join(pks)
+
+    """
     return '-'.join(map(lambda k: str(getattr(target, k.name)), primary_key))
 
 

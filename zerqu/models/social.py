@@ -161,7 +161,7 @@ def register_service(name):
 
 
 def fetch_profile(remote, data):
-    """获取个人信息"""
+    """获取社交认证的个人信息"""
     if not isinstance(data, dict):
         return None
 
